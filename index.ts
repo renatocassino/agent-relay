@@ -73,7 +73,7 @@ function parseCliArgs(): {
       process.exit(0);
     }
     if (arg === "--version" || arg === "-v") {
-      console.log("telegram-agent-relay v0.1.0");
+      console.log("telegram-agent-relay v0.1.1");
       process.exit(0);
     }
     if (!arg.startsWith("-") && i === 0) {
