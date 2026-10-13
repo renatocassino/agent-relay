@@ -118,16 +118,16 @@ export class BridgeEngine {
     }
 
     const text = msg.text.trim();
-
-    if (text.startsWith("/")) {
-      const handled = await this.handleBuiltinCommand(text);
-      if (handled) return;
+    if (chatId !== this.config.allowedChatId || userId !== this.config.allowedUserId) {
+      console.warn(`[BridgeEngine] Blocked unauthorized message from user ${userId}`);
+      await this.telegram.sendMessage(chatId, "⛔ Unauthorized access.");
+      return;
     }
 
     if (!this.isListening) {
       await this.telegram.sendMessage(
         this.config.allowedChatId,
-        "⏸️ A escuta de mensagens está pausada. Use /listen para reativar."
+        "⏸️ Message listening is paused. Send /listen to resume."
       );
       return;
     }
@@ -143,33 +143,33 @@ export class BridgeEngine {
       case "/help":
         await this.telegram.sendMessage(
           this.config.allowedChatId,
-          `🛠️ **Comandos da Ponte Universal**\n\n` +
-            `• /status - Ver backend ativo, target e fila\n` +
-            `• /listen - Ativar envio de mensagens ao terminal\n` +
-            `• /stop - Pausar envio de mensagens\n` +
-            `• /backend <orca|tmux|cmux> - Alternar backend de terminal\n` +
-            `• /targets - Listar targets/janelas disponíveis\n` +
-            `• /runs - Listar runs (quando no Orca)\n` +
-            `• /tasks <run_id> - Listar tarefas do run no Orca\n` +
-            `• /clear - Limpar fila de mensagens\n` +
-            `• /help - Guia de comandos`
+          `🛠️ **AgentWalkie Commands**\n\n` +
+            `• /status - View active backend, target handle/pane, and queue\n` +
+            `• /listen - Resume forwarding messages to the terminal\n` +
+            `• /stop - Pause forwarding messages\n` +
+            `• /backend <orca|tmux|cmux> - Switch terminal backend\n` +
+            `• /targets - List available windows/panes/tabs\n` +
+            `• /runs - List multi-agent orchestration runs (Orca)\n` +
+            `• /tasks <run_id> - List tasks for an orchestration run (Orca)\n` +
+            `• /clear - Clear pending message queue\n` +
+            `• /help - Show this command reference`
         );
         return true;
 
       case "/status":
-        const target = this.targetId || "Nenhum";
-        const stateText = this.isListening ? "🟢 Ativa (Ouvindo)" : "🟡 Pausada";
-        const procText = this.isProcessing ? "⏳ Processando" : "💤 Ocioso";
+        const target = this.targetId || "None";
+        const stateText = this.isListening ? "🟢 Active (Listening)" : "🟡 Paused";
+        const procText = this.isProcessing ? "⏳ Processing" : "💤 Idle";
         const queueCount = this.messageQueue.length;
 
         await this.telegram.sendMessage(
           this.config.allowedChatId,
-          `📊 **Status da Ponte**\n\n` +
+          `📊 **AgentWalkie Status**\n\n` +
             `• Backend: \`${this.backend.name}\`\n` +
-            `• Alvo: \`${target}\`\n` +
-            `• Escuta: ${stateText}\n` +
-            `• Estado: ${procText}\n` +
-            `• Fila: ${queueCount} mensagem(ns)`
+            `• Target: \`${target}\`\n` +
+            `• Listening: ${stateText}\n` +
+            `• State: ${procText}\n` +
+            `• Queue: ${queueCount} message(s)`
         );
         return true;
 
@@ -182,26 +182,26 @@ export class BridgeEngine {
         } else if (newBackend === "orca") {
           this.backend = new OrcaBackend();
         } else {
-          await this.telegram.sendMessage(this.config.allowedChatId, "Uso: /backend <orca|tmux|cmux>");
+          await this.telegram.sendMessage(this.config.allowedChatId, "Usage: /backend <orca|tmux|cmux>");
           return true;
         }
         this.targetId = null;
         await this.ensureTarget();
         await this.telegram.sendMessage(
           this.config.allowedChatId,
-          `🔄 Backend alterado para \`${this.backend.name}\`. Novo alvo: \`${this.targetId}\``
+          `🔄 Backend switched to \`${this.backend.name}\`. New target: \`${this.targetId}\``
         );
         return true;
 
       case "/targets":
         const list = await this.backend.listTargets();
         if (list.length === 0) {
-          await this.telegram.sendMessage(this.config.allowedChatId, "Nenhum alvo encontrado no backend ativo.");
+          await this.telegram.sendMessage(this.config.allowedChatId, "No targets found on active backend.");
         } else {
           const formatted = list.map((t) => `• \`${t.id}\`: ${t.name}`).join("\n");
           await this.telegram.sendMessage(
             this.config.allowedChatId,
-            `🎯 **Alvos no ${this.backend.name}:**\n\n${formatted}`
+            `🎯 **Targets on ${this.backend.name}:**\n\n${formatted}`
           );
         }
         return true;
@@ -209,43 +209,43 @@ export class BridgeEngine {
       case "/listen":
         this.isListening = true;
         this.stateStore.save({ isListening: true });
-        await this.telegram.sendMessage(this.config.allowedChatId, "👂 Escuta ativada!");
+        await this.telegram.sendMessage(this.config.allowedChatId, "👂 Listening activated!");
         return true;
 
       case "/stop":
         this.isListening = false;
         this.stateStore.save({ isListening: false });
-        await this.telegram.sendMessage(this.config.allowedChatId, "🛑 Escuta pausada!");
+        await this.telegram.sendMessage(this.config.allowedChatId, "🛑 Listening paused!");
         return true;
 
       case "/runs":
         const runs = await this.orcaCli.listRuns();
         if (runs.length === 0) {
-          await this.telegram.sendMessage(this.config.allowedChatId, "Nenhum run ativo encontrado no Orca.");
+          await this.telegram.sendMessage(this.config.allowedChatId, "No active runs found in Orca.");
         } else {
           const runList = runs.map((r) => `• \`${r.id}\`: ${r.objective.slice(0, 80)}`).join("\n");
-          await this.telegram.sendMessage(this.config.allowedChatId, `📋 **Runs Orca:**\n\n${runList}`);
+          await this.telegram.sendMessage(this.config.allowedChatId, `📋 **Orca Runs:**\n\n${runList}`);
         }
         return true;
 
       case "/tasks":
         const runId = parts[1];
         if (!runId) {
-          await this.telegram.sendMessage(this.config.allowedChatId, "Uso: /tasks <run_id>");
+          await this.telegram.sendMessage(this.config.allowedChatId, "Usage: /tasks <run_id>");
           return true;
         }
         const tasks = await this.orcaCli.listTasks(runId);
         if (tasks.length === 0) {
-          await this.telegram.sendMessage(this.config.allowedChatId, `Nenhuma tarefa para o run ${runId}.`);
+          await this.telegram.sendMessage(this.config.allowedChatId, `No tasks found for run ${runId}.`);
         } else {
           const taskList = tasks.map((t) => `• [${t.status}] \`${t.id}\`: ${t.task_title}`).join("\n");
-          await this.telegram.sendMessage(this.config.allowedChatId, `📋 **Tarefas \`${runId}\`:**\n\n${taskList}`);
+          await this.telegram.sendMessage(this.config.allowedChatId, `📋 **Tasks \`${runId}\`:**\n\n${taskList}`);
         }
         return true;
 
       case "/clear":
         this.messageQueue = [];
-        await this.telegram.sendMessage(this.config.allowedChatId, "🧹 Fila limpa.");
+        await this.telegram.sendMessage(this.config.allowedChatId, "🧹 Message queue cleared.");
         return true;
     }
 
@@ -257,7 +257,7 @@ export class BridgeEngine {
       this.messageQueue.push(text);
       await this.telegram.sendMessage(
         this.config.allowedChatId,
-        `⏳ Orquestrador ocupado. Mensagem enfileirada (${this.messageQueue.length} na frente).`
+        `⏳ Agent busy. Message enqueued (${this.messageQueue.length} ahead).`
       );
       return;
     }
@@ -272,7 +272,7 @@ export class BridgeEngine {
       console.log(`[BridgeEngine] Dispatching to ${this.backend.name} [${handle}]: "${text}"`);
       const sent = await this.backend.send(handle, text);
       if (!sent) {
-        await this.telegram.sendMessage(this.config.allowedChatId, `❌ Falha ao enviar para ${this.backend.name}.`);
+        await this.telegram.sendMessage(this.config.allowedChatId, `❌ Failed to dispatch to ${this.backend.name}.`);
       }
     } finally {
       setTimeout(() => {

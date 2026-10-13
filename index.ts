@@ -23,7 +23,7 @@ function loadEnv(): Record<string, string> {
 }
 
 async function main(): Promise<void> {
-  console.log("🚀 Iniciando Telegram Orchestrator Bridge...");
+  console.log("🚀 Starting AgentWalkie Bridge...");
 
   const env = loadEnv();
   const botToken = process.env.TELEGRAM_BOT_TOKEN || env.TELEGRAM_BOT_TOKEN;
@@ -32,11 +32,11 @@ async function main(): Promise<void> {
   const coordinatorHandle = process.env.ORCA_COORDINATOR_HANDLE || env.ORCA_COORDINATOR_HANDLE;
 
   if (!botToken || !allowedChatIdRaw || !allowedUserIdRaw) {
-    console.error("❌ ERRO: Configurações obrigatórias ausentes no arquivo .env ou variáveis de ambiente:");
+    console.error("❌ ERROR: Missing required configuration in .env or environment variables:");
     console.error("   - TELEGRAM_BOT_TOKEN");
     console.error("   - ALLOWED_CHAT_ID");
     console.error("   - ALLOWED_USER_ID");
-    console.error("Copie .env.sample para .env e preencha os valores antes de iniciar.");
+    console.error("Copy .env.sample to .env and fill in credentials before starting.");
     process.exit(1);
   }
 
@@ -44,19 +44,19 @@ async function main(): Promise<void> {
   const allowedUserId = parseInt(allowedUserIdRaw, 10);
 
   if (isNaN(allowedChatId) || isNaN(allowedUserId)) {
-    console.error("❌ ERRO: ALLOWED_CHAT_ID e ALLOWED_USER_ID devem ser números inteiros válidos.");
+    console.error("❌ ERROR: ALLOWED_CHAT_ID and ALLOWED_USER_ID must be valid integers.");
     process.exit(1);
   }
 
   // Prevent dual instances running against same bot
   const lock = new SingleInstanceLock(join(process.cwd(), ".bridge.lock"));
   if (!lock.acquire()) {
-    console.error("❌ Outra instância do Telegram Orchestrator já está em execução neste diretório!");
+    console.error("❌ Another instance of AgentWalkie is already running in this directory!");
     process.exit(1);
   }
 
   const cleanup = () => {
-    console.log("\n🛑 Encerrando Telegram Orchestrator Bridge...");
+    console.log("\n🛑 Shutting down AgentWalkie Bridge...");
     lock.release();
     process.exit(0);
   };
@@ -79,6 +79,6 @@ async function main(): Promise<void> {
 
 main().catch((err: unknown) => {
   const msg = err instanceof Error ? err.message : String(err);
-  console.error("💥 Erro fatal:", msg);
+  console.error("💥 Fatal error:", msg);
   process.exit(1);
 });
