@@ -11,7 +11,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/renatocassino/agent-relay.git"
+    "url": "git+https://github.com/renatocassino/telegram-agent-relay.git"
   },
   "keywords": [
     "ai",
