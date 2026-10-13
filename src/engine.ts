@@ -143,7 +143,7 @@ export class BridgeEngine {
       case "/help":
         await this.telegram.sendMessage(
           this.config.allowedChatId,
-          `🛠️ **AgentWalkie Commands**\n\n` +
+          `🛠️ **AgentRelay Commands**\n\n` +
             `• /status - View active backend, target handle/pane, and queue\n` +
             `• /listen - Resume forwarding messages to the terminal\n` +
             `• /stop - Pause forwarding messages\n` +
@@ -164,7 +164,7 @@ export class BridgeEngine {
 
         await this.telegram.sendMessage(
           this.config.allowedChatId,
-          `📊 **AgentWalkie Status**\n\n` +
+          `📊 **AgentRelay Status**\n\n` +
             `• Backend: \`${this.backend.name}\`\n` +
             `• Target: \`${target}\`\n` +
             `• Listening: ${stateText}\n` +

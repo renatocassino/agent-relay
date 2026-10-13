@@ -1,8 +1,8 @@
-# AgentWalkie
+# AgentRelay
 
 Two-way walkie-talkie connecting your mobile messengers (Telegram, Discord coming soon) directly to local AI coding agent sessions (**Orca, Claude Code, Codex, OpenCode, Cursor**) running inside terminal multiplexers (**Orca, tmux, cmux**).
 
-AgentWalkie receives prompts via long polling, dispatches them to your selected terminal target, watches the agent's session log stream, and relays back **only settled assistant responses** — zero streaming clutter, zero TUI repaints.
+AgentRelay receives prompts via long polling, dispatches them to your selected terminal target, watches the agent's session log stream, and relays back **only settled assistant responses** — zero streaming clutter, zero TUI repaints.
 
 ---
 
@@ -96,9 +96,9 @@ flowchart LR
 
 ## 🔄 Background Service on macOS (Launchd)
 
-To keep AgentWalkie running continuously and launch automatically on login:
+To keep AgentRelay running continuously and launch automatically on login:
 
-1. Create `~/Library/LaunchAgents/dev.cassino.agentwalkie.plist`:
+1. Create `~/Library/LaunchAgents/dev.cassino.agentrelay.plist`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -106,7 +106,7 @@ To keep AgentWalkie running continuously and launch automatically on login:
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>dev.cassino.agentwalkie</string>
+    <string>dev.cassino.agentrelay</string>
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/bin/bun</string>
@@ -128,12 +128,12 @@ To keep AgentWalkie running continuously and launch automatically on login:
 
 2. Load the service:
 ```bash
-launchctl load ~/Library/LaunchAgents/dev.cassino.agentwalkie.plist
+launchctl load ~/Library/LaunchAgents/dev.cassino.agentrelay.plist
 ```
 
 3. Unload / stop:
 ```bash
-launchctl unload ~/Library/LaunchAgents/dev.cassino.agentwalkie.plist
+launchctl unload ~/Library/LaunchAgents/dev.cassino.agentrelay.plist
 ```
 
 ---

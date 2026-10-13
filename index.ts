@@ -23,7 +23,7 @@ function loadEnv(): Record<string, string> {
 }
 
 async function main(): Promise<void> {
-  console.log("🚀 Starting AgentWalkie Bridge...");
+  console.log("🚀 Starting AgentRelay Bridge...");
 
   const env = loadEnv();
   const botToken = process.env.TELEGRAM_BOT_TOKEN || env.TELEGRAM_BOT_TOKEN;
@@ -51,12 +51,12 @@ async function main(): Promise<void> {
   // Prevent dual instances running against same bot
   const lock = new SingleInstanceLock(join(process.cwd(), ".bridge.lock"));
   if (!lock.acquire()) {
-    console.error("❌ Another instance of AgentWalkie is already running in this directory!");
+    console.error("❌ Another instance of AgentRelay is already running in this directory!");
     process.exit(1);
   }
 
   const cleanup = () => {
-    console.log("\n🛑 Shutting down AgentWalkie Bridge...");
+    console.log("\n🛑 Shutting down AgentRelay Bridge...");
     lock.release();
     process.exit(0);
   };

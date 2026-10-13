@@ -1,5 +1,5 @@
 {
-  "name": "agentwalkie",
+  "name": "agentrelay",
   "module": "index.ts",
   "type": "module",
   "private": true,
