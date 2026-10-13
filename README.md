@@ -1,8 +1,8 @@
-# Telegram Orchestrator
+# AgentWalkie
 
-Ponte bidirecional minimalista e resiliente entre seu Telegram e uma sessão de IA/orquestrador rodando no **Orca** nesta máquina local.
+Walkie-talkie bidirecional entre seus mensageiros (Telegram, Discord em breve) e sessões de agentes de IA locais (**Orca, Claude Code, Codex, OpenCode, Cursor**) rodando em qualquer multiplexador de terminal (**Orca, tmux, cmux**).
 
-A ponte escuta mensagens do seu chat privado via **long polling**, encaminha as instruções diretamente para o terminal do agente via CLI do **Orca**, monitora o log de sessão e devolve **apenas as respostas finais** concluídas pelo assistente, eliminando ruídos de streaming ou repinturas de tela.
+Escuta mensagens do chat privado via **long polling**, despacha para o terminal desejado, monitora o log de sessão do agente e devolve **apenas respostas conclusivas** (`settled`), com zero ruído de streaming ou repintura de tela.
 
 ---
 

@@ -1,5 +1,5 @@
 {
-  "name": "telegram-orchestrator",
+  "name": "agentwalkie",
   "module": "index.ts",
   "type": "module",
   "private": true,
