@@ -1,15 +1,50 @@
 {
   "name": "agentrelay",
-  "module": "index.ts",
+  "version": "0.1.0",
+  "description": "Two-way walkie-talkie connecting Telegram to local AI agent sessions (Orca, Claude, Codex, OpenCode, tmux, cmux)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "agentrelay": "./bin/agentrelay.js",
+    "agent-relay": "./bin/agentrelay.js"
+  },
   "type": "module",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/renatocassino/agentrelay.git"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "telegram",
+    "orca",
+    "claude",
+    "codex",
+    "opencode",
+    "tmux",
+    "cmux",
+    "walkie-talkie",
+    "relay",
+    "bridge"
+  ],
+  "author": "Renato Cassino",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
+    "build": "bun build index.ts --target=node --outdir dist",
+    "prepublishOnly": "bun run build && bun test",
     "start": "bun run index.ts",
     "dev": "bun --watch index.ts",
     "test": "bun test"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^22.13.0"
   },
   "peerDependencies": {
     "typescript": "^7"

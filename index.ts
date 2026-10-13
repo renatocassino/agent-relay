@@ -22,21 +22,123 @@ function loadEnv(): Record<string, string> {
   return result;
 }
 
-async function main(): Promise<void> {
-  console.log("🚀 Starting AgentRelay Bridge...");
+function printUsage(): void {
+  console.log(`
+AgentRelay CLI 🚀
+Walkie-talkie connecting Telegram to local AI agent sessions.
 
+Usage:
+  npx agentrelay [command] [options]
+  agentrelay [command] [options]
+
+Commands:
+  start                     Start the bridge (default)
+  status                    Check status and local lock
+  --help, -h                Show this help message
+  --version, -v             Show version
+
+Options:
+  --token <token>           Telegram Bot Token (or TELEGRAM_BOT_TOKEN)
+  --chat <id>               Allowed Telegram Chat ID (or ALLOWED_CHAT_ID)
+  --user <id>               Allowed Telegram User ID (or ALLOWED_USER_ID)
+  --backend <orca|tmux|cmux> Terminal backend (default: orca)
+  --target <id>             Specific target pane / handle (optional)
+
+Environment variables (.env file in working directory also supported):
+  TELEGRAM_BOT_TOKEN        Bot token from @BotFather
+  ALLOWED_CHAT_ID           Your Telegram chat id
+  ALLOWED_USER_ID           Your Telegram user id
+  TERMINAL_BACKEND          orca | tmux | cmux (default: orca)
+  TARGET_ID                 Target handle or pane id
+`);
+}
+
+function parseCliArgs(): {
+  command: string;
+  token?: string;
+  chat?: string;
+  user?: string;
+  backend?: "orca" | "tmux" | "cmux";
+  target?: string;
+} {
+  const args = process.argv.slice(2);
+  let command = "start";
+  const parsed: Record<string, string> = {};
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (!arg) continue;
+
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg === "--version" || arg === "-v") {
+      console.log("agentrelay v0.1.0");
+      process.exit(0);
+    }
+    if (!arg.startsWith("-") && i === 0) {
+      command = arg;
+      continue;
+    }
+
+    if (arg.startsWith("--")) {
+      const key = arg.slice(2);
+      const val = args[i + 1];
+      if (val && !val.startsWith("-")) {
+        parsed[key] = val;
+        i++;
+      }
+    }
+  }
+
+  const backendVal = parsed.backend;
+  const backend =
+    backendVal === "orca" || backendVal === "tmux" || backendVal === "cmux" ? backendVal : undefined;
+
+  return {
+    command,
+    token: parsed.token,
+    chat: parsed.chat,
+    user: parsed.user,
+    backend,
+    target: parsed.target,
+  };
+}
+
+async function main(): Promise<void> {
+  const cli = parseCliArgs();
   const env = loadEnv();
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || env.TELEGRAM_BOT_TOKEN;
-  const allowedChatIdRaw = process.env.ALLOWED_CHAT_ID || env.ALLOWED_CHAT_ID;
-  const allowedUserIdRaw = process.env.ALLOWED_USER_ID || env.ALLOWED_USER_ID;
-  const coordinatorHandle = process.env.ORCA_COORDINATOR_HANDLE || env.ORCA_COORDINATOR_HANDLE;
+
+  const botToken = cli.token || process.env.TELEGRAM_BOT_TOKEN || env.TELEGRAM_BOT_TOKEN;
+  const allowedChatIdRaw = cli.chat || process.env.ALLOWED_CHAT_ID || env.ALLOWED_CHAT_ID;
+  const allowedUserIdRaw = cli.user || process.env.ALLOWED_USER_ID || env.ALLOWED_USER_ID;
+  const terminalBackend =
+    cli.backend ||
+    (process.env.TERMINAL_BACKEND as "orca" | "tmux" | "cmux") ||
+    (env.TERMINAL_BACKEND as "orca" | "tmux" | "cmux") ||
+    "orca";
+  const targetId =
+    cli.target ||
+    process.env.TARGET_ID ||
+    env.TARGET_ID ||
+    process.env.ORCA_COORDINATOR_HANDLE ||
+    env.ORCA_COORDINATOR_HANDLE;
+
+  if (cli.command === "status") {
+    const lockFile = join(process.cwd(), ".bridge.lock");
+    const isRunning = existsSync(lockFile);
+    console.log(`AgentRelay Status:`);
+    console.log(`- Running locally: ${isRunning ? "Yes (lock present)" : "No"}`);
+    console.log(`- Backend: ${terminalBackend}`);
+    console.log(`- Configured chat: ${allowedChatIdRaw || "None"}`);
+    return;
+  }
 
   if (!botToken || !allowedChatIdRaw || !allowedUserIdRaw) {
-    console.error("❌ ERROR: Missing required configuration in .env or environment variables:");
-    console.error("   - TELEGRAM_BOT_TOKEN");
-    console.error("   - ALLOWED_CHAT_ID");
-    console.error("   - ALLOWED_USER_ID");
-    console.error("Copy .env.sample to .env and fill in credentials before starting.");
+    console.error("❌ ERROR: Missing required configuration.");
+    console.error("Provide via flags (--token, --chat, --user), .env file, or environment variables.\n");
+    printUsage();
     process.exit(1);
   }
 
@@ -48,7 +150,6 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // Prevent dual instances running against same bot
   const lock = new SingleInstanceLock(join(process.cwd(), ".bridge.lock"));
   if (!lock.acquire()) {
     console.error("❌ Another instance of AgentRelay is already running in this directory!");
@@ -64,12 +165,14 @@ async function main(): Promise<void> {
   process.on("SIGINT", cleanup);
   process.on("SIGTERM", cleanup);
 
+  console.log("🚀 Starting AgentRelay Bridge...");
   const stateStore = new StateStore(join(process.cwd(), "state.json"));
   const config: BridgeConfig = {
     botToken,
     allowedChatId,
     allowedUserId,
-    coordinatorHandle,
+    terminalBackend,
+    targetId,
   };
 
   const engine = new BridgeEngine(config, stateStore);

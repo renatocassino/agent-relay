@@ -49,10 +49,38 @@ ALLOWED_USER_ID=383093166
 
 ### 3. Run
 
+#### Option A: Direct zero-install via npx
+```bash
+npx agentrelay
+```
+Or pass credentials directly via CLI flags:
+```bash
+npx agentrelay --token "<BOT_TOKEN>" --chat <CHAT_ID> --user <USER_ID>
+```
+
+#### Option B: Global install
+```bash
+npm install -g agentrelay
+agentrelay
+```
+
+#### Option C: From source with Bun
 ```bash
 bun run start
 ```
 
+#### CLI Options Reference
+```bash
+agentrelay [options]
+
+  --token <token>           Telegram Bot Token (or TELEGRAM_BOT_TOKEN)
+  --chat <id>               Allowed Telegram Chat ID (or ALLOWED_CHAT_ID)
+  --user <id>               Allowed Telegram User ID (or ALLOWED_USER_ID)
+  --backend <orca|tmux|cmux> Terminal multiplexer (default: orca)
+  --target <id>             Specific target window/pane handle (optional)
+  --help, -h                Show help
+  --version, -v             Show version
+```
 ---
 
 ## 🎮 Telegram In-Chat Commands
