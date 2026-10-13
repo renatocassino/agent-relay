@@ -1,17 +1,17 @@
 {
-  "name": "agentrelay",
+  "name": "telegram-agent-relay",
   "version": "0.1.0",
   "description": "Two-way walkie-talkie connecting Telegram to local AI agent sessions (Orca, Claude, Codex, OpenCode, tmux, cmux)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "agentrelay": "./bin/agentrelay.js",
-    "agent-relay": "./bin/agentrelay.js"
+    "telegram-agent-relay": "./bin/agentrelay.js",
+    "tg-agent-relay": "./bin/agentrelay.js"
   },
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/renatocassino/agentrelay.git"
+    "url": "https://github.com/renatocassino/telegram-agent-relay.git"
   },
   "keywords": [
     "ai",

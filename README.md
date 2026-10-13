@@ -1,8 +1,8 @@
-# AgentRelay
+# Telegram Agent Relay
 
-Two-way walkie-talkie connecting your mobile messengers (Telegram, Discord coming soon) directly to local AI coding agent sessions (**Orca, Claude Code, Codex, OpenCode, Cursor**) running inside terminal multiplexers (**Orca, tmux, cmux**).
+Two-way walkie-talkie connecting your Telegram chat directly to local AI coding agent sessions (**Orca, Claude Code, Codex, OpenCode, Cursor**) running inside terminal multiplexers (**Orca, tmux, cmux**).
 
-AgentRelay receives prompts via long polling, dispatches them to your selected terminal target, watches the agent's session log stream, and relays back **only settled assistant responses** — zero streaming clutter, zero TUI repaints.
+Telegram Agent Relay receives prompts via long polling, dispatches them to your selected terminal target, watches the agent's session log stream, and relays back **only settled assistant responses** — zero streaming clutter, zero TUI repaints.
 
 ---
 
@@ -51,17 +51,17 @@ ALLOWED_USER_ID=383093166
 
 #### Option A: Direct zero-install via npx
 ```bash
-npx agentrelay
+npx telegram-agent-relay
 ```
 Or pass credentials directly via CLI flags:
 ```bash
-npx agentrelay --token "<BOT_TOKEN>" --chat <CHAT_ID> --user <USER_ID>
+npx telegram-agent-relay --token "<BOT_TOKEN>" --chat <CHAT_ID> --user <USER_ID>
 ```
 
 #### Option B: Global install
 ```bash
-npm install -g agentrelay
-agentrelay
+npm install -g telegram-agent-relay
+telegram-agent-relay
 ```
 
 #### Option C: From source with Bun
@@ -71,7 +71,7 @@ bun run start
 
 #### CLI Options Reference
 ```bash
-agentrelay [options]
+telegram-agent-relay [options]
 
   --token <token>           Telegram Bot Token (or TELEGRAM_BOT_TOKEN)
   --chat <id>               Allowed Telegram Chat ID (or ALLOWED_CHAT_ID)
@@ -124,9 +124,9 @@ flowchart LR
 
 ## 🔄 Background Service on macOS (Launchd)
 
-To keep AgentRelay running continuously and launch automatically on login:
+To keep Telegram Agent Relay running continuously and launch automatically on login:
 
-1. Create `~/Library/LaunchAgents/dev.cassino.agentrelay.plist`:
+1. Create `~/Library/LaunchAgents/dev.cassino.telegram-agent-relay.plist`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -134,7 +134,7 @@ To keep AgentRelay running continuously and launch automatically on login:
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>dev.cassino.agentrelay</string>
+    <string>dev.cassino.telegram-agent-relay</string>
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/bin/bun</string>
@@ -156,12 +156,12 @@ To keep AgentRelay running continuously and launch automatically on login:
 
 2. Load the service:
 ```bash
-launchctl load ~/Library/LaunchAgents/dev.cassino.agentrelay.plist
+launchctl load ~/Library/LaunchAgents/dev.cassino.telegram-agent-relay.plist
 ```
 
 3. Unload / stop:
 ```bash
-launchctl unload ~/Library/LaunchAgents/dev.cassino.agentrelay.plist
+launchctl unload ~/Library/LaunchAgents/dev.cassino.telegram-agent-relay.plist
 ```
 
 ---

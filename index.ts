@@ -24,13 +24,12 @@ function loadEnv(): Record<string, string> {
 
 function printUsage(): void {
   console.log(`
-AgentRelay CLI 🚀
+Telegram Agent Relay CLI 🚀
 Walkie-talkie connecting Telegram to local AI agent sessions.
 
 Usage:
-  npx agentrelay [command] [options]
-  agentrelay [command] [options]
-
+  npx telegram-agent-relay [command] [options]
+  telegram-agent-relay [command] [options]
 Commands:
   start                     Start the bridge (default)
   status                    Check status and local lock
@@ -74,7 +73,7 @@ function parseCliArgs(): {
       process.exit(0);
     }
     if (arg === "--version" || arg === "-v") {
-      console.log("agentrelay v0.1.0");
+      console.log("telegram-agent-relay v0.1.0");
       process.exit(0);
     }
     if (!arg.startsWith("-") && i === 0) {
@@ -128,7 +127,7 @@ async function main(): Promise<void> {
   if (cli.command === "status") {
     const lockFile = join(process.cwd(), ".bridge.lock");
     const isRunning = existsSync(lockFile);
-    console.log(`AgentRelay Status:`);
+    console.log(`Telegram Agent Relay Status:`);
     console.log(`- Running locally: ${isRunning ? "Yes (lock present)" : "No"}`);
     console.log(`- Backend: ${terminalBackend}`);
     console.log(`- Configured chat: ${allowedChatIdRaw || "None"}`);
@@ -152,12 +151,12 @@ async function main(): Promise<void> {
 
   const lock = new SingleInstanceLock(join(process.cwd(), ".bridge.lock"));
   if (!lock.acquire()) {
-    console.error("❌ Another instance of AgentRelay is already running in this directory!");
+    console.error("❌ Another instance of telegram-agent-relay is already running in this directory!");
     process.exit(1);
   }
 
   const cleanup = () => {
-    console.log("\n🛑 Shutting down AgentRelay Bridge...");
+    console.log("\n🛑 Shutting down Telegram Agent Relay Bridge...");
     lock.release();
     process.exit(0);
   };
@@ -165,7 +164,7 @@ async function main(): Promise<void> {
   process.on("SIGINT", cleanup);
   process.on("SIGTERM", cleanup);
 
-  console.log("🚀 Starting AgentRelay Bridge...");
+  console.log("🚀 Starting Telegram Agent Relay Bridge...");
   const stateStore = new StateStore(join(process.cwd(), "state.json"));
   const config: BridgeConfig = {
     botToken,
